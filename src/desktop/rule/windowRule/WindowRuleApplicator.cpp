@@ -312,6 +312,11 @@ CWindowRuleApplicator::SRuleResult CWindowRuleApplicator::applyDynamicRule(const
                 m_noShortcutsInhibit.second |= rule->getPropertiesMask();
                 break;
             }
+            case WINDOW_RULE_EFFECT_SHORTCUTS_INHIBIT: {
+                m_shortcutsInhibit.first.set(truthy(effect), Types::PRIORITY_WINDOW_RULE);
+                m_shortcutsInhibit.second |= rule->getPropertiesMask();
+                break;
+            }
             case WINDOW_RULE_EFFECT_OPAQUE: {
                 m_opaque.first.set(std::get<bool>(value), Types::PRIORITY_WINDOW_RULE);
                 m_opaque.second |= rule->getPropertiesMask();
