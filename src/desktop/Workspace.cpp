@@ -155,6 +155,7 @@ bool CWorkspace::matchesStaticSelector(const std::string& selector_) {
             //                  flag v will count only visible windows
             // f - fullscreen state : f[-1], f[0], f[1], or f[2] for different fullscreen states
             //                        -1: no fullscreen, 0: fullscreen, 1: maximized, 2: fullscreen without sending fs state to window
+            // l - layout: l[scrolling]
 
             const auto  CLOSING_BRACKET = selector.find_first_of(']', i);
             std::string prop            = selector.substr(i, CLOSING_BRACKET == std::string::npos ? std::string::npos : CLOSING_BRACKET + 1 - i);
@@ -383,6 +384,18 @@ bool CWorkspace::matchesStaticSelector(const std::string& selector_) {
                         break;
                     default: break;
                 }
+                continue;
+            }
+
+            if (cur == 'l') {
+                if (!prop.starts_with("l[") || !prop.ends_with("]")) {
+                    LOG(Log::DEBUG, "Invalid selector {}", selector);
+                    return false;
+                }
+                prop              = prop.substr(2, prop.length() - 3);
+                const auto LAYOUT = Layout::Supplementary::algoMatcher()->getNameForTiledAlgo(&typeid(*m_space->algorithm()->tiledAlgo().get()));
+                if (prop != LAYOUT)
+                    return false;
                 continue;
             }
 
