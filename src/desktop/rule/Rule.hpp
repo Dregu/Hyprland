@@ -29,9 +29,10 @@ namespace Desktop::Rule {
         RULE_PROP_ON_WORKSPACE             = (1 << 14),
         RULE_PROP_CONTENT                  = (1 << 15),
         RULE_PROP_XDG_TAG                  = (1 << 16),
-        RULE_PROP_NAMESPACE                = (1 << 17),
-        RULE_PROP_EXEC_TOKEN               = (1 << 18),
-        RULE_PROP_EXEC_PID                 = (1 << 19),
+        RULE_PROP_MIN_SIZE                 = (1 << 17),
+        RULE_PROP_NAMESPACE                = (1 << 18),
+        RULE_PROP_EXEC_TOKEN               = (1 << 19),
+        RULE_PROP_EXEC_PID                 = (1 << 20),
 
         RULE_PROP_ALL = std::numeric_limits<std::underlying_type_t<eRuleProperty>>::max(),
     };

@@ -21,3 +21,7 @@ bool IMatchEngine::match(PHLWORKSPACE) {
 bool IMatchEngine::match(const CTagKeeper& keeper) {
     return false;
 }
+
+bool IMatchEngine::match(Hyprutils::Math::Vector2D) {
+    return false;
+}

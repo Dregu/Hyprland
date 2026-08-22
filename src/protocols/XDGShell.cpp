@@ -248,6 +248,7 @@ CXDGToplevelResource::CXDGToplevelResource(SP<CXdgToplevel> resource_, SP<CXDGSu
         if (m_owner && m_owner->m_surface)
             m_owner->m_surface->m_pending.updated.bits.xdgshell = true;
         m_events.sizeLimitsChanged.emit();
+        m_window->m_ruleApplicator->propertiesChanged(Desktop::Rule::RULE_PROP_MIN_SIZE);
     });
 
     m_resource->setSetMaximized([this](CXdgToplevel* r) {

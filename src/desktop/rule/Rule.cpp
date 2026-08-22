@@ -7,6 +7,7 @@
 #include "matchEngine/IntMatchEngine.hpp"
 #include "matchEngine/WorkspaceMatchEngine.hpp"
 #include "matchEngine/TagMatchEngine.hpp"
+#include "matchEngine/SizeMatchEngine.hpp"
 
 #include <algorithm>
 #include <array>
@@ -41,6 +42,7 @@ constexpr auto MATCH_PROP_STRINGS =
         {RULE_PROP_ON_WORKSPACE, "workspace"},                             //
         {RULE_PROP_CONTENT, "content"},                                    //
         {RULE_PROP_XDG_TAG, "xdg_tag"},                                    //
+        {RULE_PROP_MIN_SIZE, "min_size"},                                  //
         {RULE_PROP_NAMESPACE, "namespace"},                                //
     }));
 
@@ -66,6 +68,7 @@ constexpr auto RULE_ENGINES =
         {RULE_PROP_ON_WORKSPACE, RULE_MATCH_ENGINE_WORKSPACE},       //
         {RULE_PROP_CONTENT, RULE_MATCH_ENGINE_REGEX},                //
         {RULE_PROP_XDG_TAG, RULE_MATCH_ENGINE_REGEX},                //
+        {RULE_PROP_MIN_SIZE, RULE_MATCH_ENGINE_SIZE},                //
         {RULE_PROP_NAMESPACE, RULE_MATCH_ENGINE_REGEX},              //
         {RULE_PROP_EXEC_TOKEN, RULE_MATCH_ENGINE_REGEX},             //
         {RULE_PROP_EXEC_PID, RULE_MATCH_ENGINE_INT},                 //
@@ -100,6 +103,7 @@ void IRule::registerMatch(eRuleProperty p, const std::string& s) {
         case RULE_MATCH_ENGINE_INT: m_matchEngines[p] = makeUnique<CIntMatchEngine>(s); break;
         case RULE_MATCH_ENGINE_WORKSPACE: m_matchEngines[p] = makeUnique<CWorkspaceMatchEngine>(s); break;
         case RULE_MATCH_ENGINE_TAG: m_matchEngines[p] = makeUnique<CTagMatchEngine>(s); break;
+        case RULE_MATCH_ENGINE_SIZE: m_matchEngines[p] = makeUnique<CSizeMatchEngine>(s); break;
     }
 
     m_mask |= p;

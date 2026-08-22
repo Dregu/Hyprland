@@ -459,6 +459,10 @@ bool CWindowRule::matches(PHLWINDOW w, bool allowEnvLookup) {
                 if (const auto TAG = w->backend().metadata().tag; !TAG.has_value() || !engine->match(*TAG))
                     return false;
                 break;
+            case RULE_PROP_MIN_SIZE:
+                if (const auto MIN_SIZE = w->backend().geometryHints(View::eBackendState::BACKEND_STATE_CURRENT).minSize; !MIN_SIZE.has_value() || !engine->match(MIN_SIZE.value()))
+                    return false;
+                break;
 
             case RULE_PROP_EXEC_TOKEN:
                 if (!allowEnvLookup)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../DesktopTypes.hpp"
+#include <hyprutils/math/Vector2D.hpp>
 
 class CTagKeeper;
 
@@ -11,6 +12,7 @@ namespace Desktop::Rule {
         RULE_MATCH_ENGINE_INT,
         RULE_MATCH_ENGINE_WORKSPACE,
         RULE_MATCH_ENGINE_TAG,
+        RULE_MATCH_ENGINE_SIZE,
     };
 
     class IMatchEngine {
@@ -21,6 +23,7 @@ namespace Desktop::Rule {
         virtual bool match(int);
         virtual bool match(PHLWORKSPACE);
         virtual bool match(const CTagKeeper& keeper);
+        virtual bool match(Hyprutils::Math::Vector2D);
 
       protected:
         IMatchEngine() = default;
