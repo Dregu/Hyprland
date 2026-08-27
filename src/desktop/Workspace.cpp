@@ -23,6 +23,8 @@
 #include "../event/EventBus.hpp"
 
 #include <hyprutils/animation/AnimatedVariable.hpp>
+#include <hyprutils/math/Misc.hpp>
+#include <hyprutils/string/Numeric.hpp>
 #include <hyprutils/string/String.hpp>
 using namespace Hyprutils::String;
 using namespace Desktop::View;
@@ -156,6 +158,7 @@ bool CWorkspace::matchesStaticSelector(const std::string& selector_) {
             // f - fullscreen state : f[-1], f[0], f[1], or f[2] for different fullscreen states
             //                        -1: no fullscreen, 0: fullscreen, 1: maximized, 2: fullscreen without sending fs state to window
             // l - layout: l[scrolling]
+            // t - transform: t[0..7 or l/p] (landscape/portait)
 
             const auto  CLOSING_BRACKET = selector.find_first_of(']', i);
             std::string prop            = selector.substr(i, CLOSING_BRACKET == std::string::npos ? std::string::npos : CLOSING_BRACKET + 1 - i);
@@ -395,6 +398,21 @@ bool CWorkspace::matchesStaticSelector(const std::string& selector_) {
                 prop              = prop.substr(2, prop.length() - 3);
                 const auto LAYOUT = Layout::Supplementary::algoMatcher()->getNameForTiledAlgo(&typeid(*m_space->algorithm()->tiledAlgo().get()));
                 if (prop != LAYOUT)
+                    return false;
+                continue;
+            }
+
+            if (cur == 't') {
+                if (!prop.starts_with("t[") || !prop.ends_with("]")) {
+                    LOG(Log::DEBUG, "Invalid selector {}", selector);
+                    return false;
+                }
+                prop = prop.substr(2, prop.length() - 3);
+                if (auto t = strToNumber<Config::INTEGER>(prop); t.has_value() && m_monitor.lock()->transform() != sc<eTransform>(t.value()))
+                    return false;
+                else if (prop.starts_with("l") && m_monitor->logicalBox().w < m_monitor->logicalBox().h)
+                    return false;
+                else if (prop.starts_with("p") && m_monitor->logicalBox().w > m_monitor->logicalBox().h)
                     return false;
                 continue;
             }
