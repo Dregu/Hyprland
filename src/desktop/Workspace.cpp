@@ -21,6 +21,8 @@
 #include "../layout/target/Target.hpp"
 #include "../layout/supplementary/WorkspaceAlgoMatcher.hpp"
 #include "../event/EventBus.hpp"
+#include "layout/algorithm/Algorithm.hpp"
+#include "layout/algorithm/TiledAlgorithm.hpp"
 
 #include <hyprutils/animation/AnimatedVariable.hpp>
 #include <hyprutils/math/Misc.hpp>
@@ -159,6 +161,7 @@ bool CWorkspace::matchesStaticSelector(const std::string& selector_) {
             //                        -1: no fullscreen, 0: fullscreen, 1: maximized, 2: fullscreen without sending fs state to window
             // l - layout: l[scrolling]
             // t - transform: t[0..7 or l/p] (landscape/portait)
+            // v - visible: v[true] (visible on any monitor)
 
             const auto  CLOSING_BRACKET = selector.find_first_of(']', i);
             std::string prop            = selector.substr(i, CLOSING_BRACKET == std::string::npos ? std::string::npos : CLOSING_BRACKET + 1 - i);
@@ -395,10 +398,12 @@ bool CWorkspace::matchesStaticSelector(const std::string& selector_) {
                     LOG(Log::DEBUG, "Invalid selector {}", selector);
                     return false;
                 }
-                prop              = prop.substr(2, prop.length() - 3);
-                const auto LAYOUT = Layout::Supplementary::algoMatcher()->getNameForTiledAlgo(&typeid(*m_space->algorithm()->tiledAlgo().get()));
-                if (prop != LAYOUT)
-                    return false;
+                prop = prop.substr(2, prop.length() - 3);
+                if (m_space && m_space->algorithm() && m_space->algorithm()->tiledAlgo()) {
+                    const auto LAYOUT = Layout::Supplementary::algoMatcher()->getNameForTiledAlgo(&typeid(*m_space->algorithm()->tiledAlgo().get()));
+                    if (prop != LAYOUT)
+                        return false;
+                }
                 continue;
             }
 
@@ -407,13 +412,33 @@ bool CWorkspace::matchesStaticSelector(const std::string& selector_) {
                     LOG(Log::DEBUG, "Invalid selector {}", selector);
                     return false;
                 }
+                const auto MONITOR = m_monitor.lock();
+                if (!MONITOR)
+                    continue;
                 prop = prop.substr(2, prop.length() - 3);
-                if (auto t = strToNumber<Config::INTEGER>(prop); t.has_value() && m_monitor.lock()->transform() != sc<eTransform>(t.value()))
+                if (auto t = strToNumber<Config::INTEGER>(prop); t.has_value() && MONITOR->transform() != sc<eTransform>(t.value()))
                     return false;
-                else if (prop.starts_with("l") && m_monitor->logicalBox().w < m_monitor->logicalBox().h)
+                else if (prop.starts_with("l") && MONITOR->logicalBox().w < MONITOR->logicalBox().h)
                     return false;
-                else if (prop.starts_with("p") && m_monitor->logicalBox().w > m_monitor->logicalBox().h)
+                else if (prop.starts_with("p") && MONITOR->logicalBox().w > MONITOR->logicalBox().h)
                     return false;
+                continue;
+            }
+
+            if (cur == 'v') {
+                if (!prop.starts_with("v[") || !prop.ends_with("]")) {
+                    LOG(Log::DEBUG, "Invalid selector {}", selector);
+                    return false;
+                }
+                prop = prop.substr(2, prop.length() - 3);
+                if (auto num = Config::ParserUtils::parseInt(prop); num.has_value()) {
+                    auto VISIBLE = sc<bool>(num.value());
+                    if (VISIBLE != isVisible())
+                        return false;
+                } else {
+                    Log::logger->log(Log::DEBUG, "Invalid selector {}", selector);
+                    return false;
+                }
                 continue;
             }
 

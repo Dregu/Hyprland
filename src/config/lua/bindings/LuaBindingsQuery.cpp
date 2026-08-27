@@ -158,11 +158,14 @@ static int hlGetUrgentWindow(lua_State* L) {
 }
 
 static int hlGetWorkspaces(lua_State* L) {
+    std::string selector;
+    if (lua_gettop(L) > 0 && !lua_isnil(L, 1))
+        selector = Internal::argStr(L, 1);
     lua_newtable(L);
     int i = 1;
     for (const auto& wsRef : State::workspaceState()->workspaces()) {
         const auto ws = wsRef.lock();
-        if (!ws || ws->inert())
+        if (!ws || ws->inert() || (!selector.empty() && !ws->matchesStaticSelector(selector)))
             continue;
         Objects::CLuaWorkspace::push(L, ws);
         lua_rawseti(L, -2, i++);
