@@ -380,6 +380,7 @@ std::string CCommandFormatter::getWindowData(PHLWINDOW w, eHyprCtlOutputFormat f
     "acceptsInput": {},
     "at": [{}, {}],
     "size": [{}, {}],
+    "minSize": [{}, {}],
     "workspace": {{
         "id": {},
         "name": "{}"
@@ -412,6 +413,12 @@ std::string CCommandFormatter::getWindowData(PHLWINDOW w, eHyprCtlOutputFormat f
             rc<uintptr_t>(w.get()), (w->mapped() ? "true" : "false"), (w->isHidden() ? "true" : "false"), (VISIBLE ? "true" : "false"), (w->acceptsInput() ? "true" : "false"),
             sc<int>(w->position(Desktop::View::IGeometric::GEOMETRIC_GOAL).x), sc<int>(w->position(Desktop::View::IGeometric::GEOMETRIC_GOAL).y),
             sc<int>(w->size(Desktop::View::IGeometric::GEOMETRIC_GOAL).x), sc<int>(w->size(Desktop::View::IGeometric::GEOMETRIC_GOAL).y),
+            (w->backend().geometryHints(Desktop::View::eBackendState::BACKEND_STATE_CURRENT).minSize.has_value() ?
+                 w->backend().geometryHints(Desktop::View::eBackendState::BACKEND_STATE_CURRENT).minSize->x :
+                 0),
+            (w->backend().geometryHints(Desktop::View::eBackendState::BACKEND_STATE_CURRENT).minSize.has_value() ?
+                 w->backend().geometryHints(Desktop::View::eBackendState::BACKEND_STATE_CURRENT).minSize->y :
+                 0),
             w->m_workspace ? w->workspaceID() : WORKSPACE_INVALID, escapeJSONStrings(!w->m_workspace ? "" : w->m_workspace->m_name),
             (sc<int>(w->isFloating()) == 1 ? "true" : "false"), w->monitorID(), escapeJSONStrings(w->metadata().appID()), escapeJSONStrings(w->metadata().title()),
             escapeJSONStrings(w->metadata().initialAppID()), escapeJSONStrings(w->metadata().initialTitle()), w->backend().pid(), (w->backend().isX11() ? "true" : "false"),
@@ -423,7 +430,8 @@ std::string CCommandFormatter::getWindowData(PHLWINDOW w, eHyprCtlOutputFormat f
             escapeJSONStrings(NContentType::toString(w->getContentType())), ((w->m_hints & Desktop::View::WINDOW_HINT_TEAR) ? "true" : "false"), w->metadata().stableID());
     } else {
         return std::format(
-            "Window {:x} -> {}:\n\tmapped: {}\n\thidden: {}\n\tvisible: {}\n\tacceptsInput: {}\n\tat: {},{}\n\tsize: {},{}\n\tworkspace: {} ({})\n\tfloating: {}\n\tmonitor: "
+            "Window {:x} -> {}:\n\tmapped: {}\n\thidden: {}\n\tvisible: {}\n\tacceptsInput: {}\n\tat: {},{}\n\tsize: {},{}\n\tminSize: {},{}\n\tworkspace: {} ({})\n\tfloating: "
+            "{}\n\tmonitor: "
             "{}\n\tclass: {}\n\ttitle: "
             "{}\n\tinitialClass: {}\n\tinitialTitle: {}\n\tpid: "
             "{}\n\txwayland: {}\n\tpinned: {}\n\tpinFullscreened: "
@@ -434,6 +442,12 @@ std::string CCommandFormatter::getWindowData(PHLWINDOW w, eHyprCtlOutputFormat f
             rc<uintptr_t>(w.get()), w->metadata().title(), sc<int>(w->mapped()), sc<int>(w->isHidden()), sc<int>(VISIBLE), sc<int>(w->acceptsInput()),
             sc<int>(w->position(Desktop::View::IGeometric::GEOMETRIC_GOAL).x), sc<int>(w->position(Desktop::View::IGeometric::GEOMETRIC_GOAL).y),
             sc<int>(w->size(Desktop::View::IGeometric::GEOMETRIC_GOAL).x), sc<int>(w->size(Desktop::View::IGeometric::GEOMETRIC_GOAL).y),
+            (w->backend().geometryHints(Desktop::View::eBackendState::BACKEND_STATE_CURRENT).minSize.has_value() ?
+                 w->backend().geometryHints(Desktop::View::eBackendState::BACKEND_STATE_CURRENT).minSize->x :
+                 0),
+            (w->backend().geometryHints(Desktop::View::eBackendState::BACKEND_STATE_CURRENT).minSize.has_value() ?
+                 w->backend().geometryHints(Desktop::View::eBackendState::BACKEND_STATE_CURRENT).minSize->y :
+                 0),
             w->m_workspace ? w->workspaceID() : WORKSPACE_INVALID, (!w->m_workspace ? "" : w->m_workspace->m_name), sc<int>(w->isFloating()), w->monitorID(), w->metadata().appID(),
             w->metadata().title(), w->metadata().initialAppID(), w->metadata().initialTitle(), w->backend().pid(), sc<int>(w->backend().isX11()),
             sc<int>(sc<bool>(w->m_state & Desktop::View::WINDOW_STATE_PINNED)), sc<int>(w->fullscreenPolicy().pinFullscreened()),
